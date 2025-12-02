@@ -1,15 +1,21 @@
-import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Button } from './ui/button';
-import { Badge } from './ui/badge';
-import { 
-  Activity, 
-  AlertTriangle, 
-  Wifi, 
+import React from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
+import { Button } from "./ui/button";
+import { Badge } from "./ui/badge";
+import {
+  Activity,
+  AlertTriangle,
+  Wifi,
   Bell,
   Clock,
-  Radio
-} from 'lucide-react';
+  Radio,
+} from "lucide-react";
 
 interface HomePageProps {
   alerts: any[];
@@ -19,45 +25,47 @@ interface HomePageProps {
 export function HomePage({ alerts, onNavigate }: HomePageProps) {
   const getStateColor = (state: string) => {
     switch (state) {
-      case 'move':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-      case 'static':
-        return 'bg-green-100 text-green-800 border-green-300';
-      case 'someone':
-        return 'bg-blue-100 text-blue-800 border-blue-300';
+      case "move":
+        return "bg-yellow-100 text-yellow-800 border-yellow-300";
+      case "static":
+        return "bg-green-100 text-green-800 border-green-300";
+      case "someone":
+        return "bg-blue-100 text-blue-800 border-blue-300";
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-300';
+        return "bg-gray-100 text-gray-800 border-gray-300";
     }
   };
 
   const getStateLabel = (state: string) => {
     switch (state) {
-      case 'move':
-        return 'Movimento';
-      case 'static':
-        return 'Vazio';
-      case 'someone':
-        return 'Presença';
+      case "move":
+        return "Movimento";
+      case "static":
+        return "Vazio";
+      case "someone":
+        return "Presença";
       default:
         return state;
     }
   };
 
   const recentAlerts = alerts.slice(0, 5);
-  
+
   // Get unique MACs
-  const uniqueMacs = [...new Set(alerts.map(a => a.mac))];
-  
+  const uniqueMacs = [...new Set(alerts.map((a) => a.mac))];
+
   // Count states
-  const moveCount = alerts.filter(a => a.state === 'move').length;
-  const staticCount = alerts.filter(a => a.state === 'static').length;
-  const someoneCount = alerts.filter(a => a.state === 'someone').length;
+  const moveCount = alerts.filter((a) => a.state === "move").length;
+  const staticCount = alerts.filter((a) => a.state === "static").length;
+  const someoneCount = alerts.filter((a) => a.state === "someone").length;
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Monitor MQTT ESP32</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">
+          Motion Monitor
+        </h1>
         <p className="text-gray-600">
           Monitoramento em tempo real de sensores de presença
         </p>
@@ -69,7 +77,9 @@ export function HomePage({ alerts, onNavigate }: HomePageProps) {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total de Eventos</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Total de Eventos
+                </p>
                 <p className="text-2xl font-bold">{alerts.length}</p>
                 <p className="text-xs text-gray-500 mt-1">Nesta sessão</p>
               </div>
@@ -82,7 +92,9 @@ export function HomePage({ alerts, onNavigate }: HomePageProps) {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Dispositivos</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Dispositivos
+                </p>
                 <p className="text-2xl font-bold">{uniqueMacs.length}</p>
                 <p className="text-xs text-gray-500 mt-1">MACs únicos</p>
               </div>
@@ -144,7 +156,7 @@ export function HomePage({ alerts, onNavigate }: HomePageProps) {
                           {getStateLabel(alert.state)}
                         </Badge>
                         <span className="text-xs text-gray-600">
-                          {new Date(alert.timestamp).toLocaleString('pt-BR')}
+                          {new Date(alert.timestamp).toLocaleString("pt-BR")}
                         </span>
                       </div>
                       <p className="text-sm font-medium">{alert.message}</p>
@@ -155,12 +167,12 @@ export function HomePage({ alerts, onNavigate }: HomePageProps) {
                   </div>
                 </div>
               ))}
-              
+
               {alerts.length > 5 && (
                 <Button
                   variant="outline"
                   className="w-full"
-                  onClick={() => onNavigate('alerts')}
+                  onClick={() => onNavigate("alerts")}
                 >
                   <Bell className="w-4 h-4 mr-2" />
                   Ver todos os eventos ({alerts.length})
@@ -194,14 +206,11 @@ export function HomePage({ alerts, onNavigate }: HomePageProps) {
           {uniqueMacs.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {uniqueMacs.map((mac) => {
-                const deviceAlerts = alerts.filter(a => a.mac === mac);
+                const deviceAlerts = alerts.filter((a) => a.mac === mac);
                 const lastAlert = deviceAlerts[0];
-                
+
                 return (
-                  <div
-                    key={mac}
-                    className="p-3 bg-gray-50 rounded-lg border"
-                  >
+                  <div key={mac} className="p-3 bg-gray-50 rounded-lg border">
                     <div className="flex items-center justify-between mb-2">
                       <p className="font-medium">{mac}</p>
                       <Badge className={getStateColor(lastAlert.state)}>
@@ -212,7 +221,8 @@ export function HomePage({ alerts, onNavigate }: HomePageProps) {
                       {deviceAlerts.length} evento(s) registrado(s)
                     </p>
                     <p className="text-xs text-gray-500">
-                      Último: {new Date(lastAlert.timestamp).toLocaleString('pt-BR')}
+                      Último:{" "}
+                      {new Date(lastAlert.timestamp).toLocaleString("pt-BR")}
                     </p>
                   </div>
                 );
@@ -237,9 +247,11 @@ export function HomePage({ alerts, onNavigate }: HomePageProps) {
               <Activity className="w-5 h-5 text-blue-600" />
             </div>
             <div className="flex-1">
-              <h3 className="font-medium text-blue-900 mb-1">Armazenamento Temporário</h3>
+              <h3 className="font-medium text-blue-900 mb-1">
+                Armazenamento Temporário
+              </h3>
               <p className="text-sm text-blue-700">
-                Todos os eventos são armazenados apenas durante a sessão atual. 
+                Todos os eventos são armazenados apenas durante a sessão atual.
                 Ao recarregar a página, os dados serão perdidos.
               </p>
             </div>
