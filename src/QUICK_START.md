@@ -7,6 +7,11 @@
 npm install
 ```
 
+**Nota**: Se houver erro com Tailwind v4, o sistema usará a versão alpha mais estável. Caso persista, rode:
+```bash
+npm install --legacy-peer-deps
+```
+
 ### 2️⃣ Rodar o sistema
 ```bash
 npm run dev
