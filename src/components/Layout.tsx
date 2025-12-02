@@ -34,9 +34,21 @@ export function Layout({ children, currentPage, onNavigate, alertCount = 0, onAd
   const [isConnected, setIsConnected] = useState(false);
   
   // MQTT Settings
-  const [mqttHost, setMqttHost] = useState(() => 
-    localStorage.getItem('mqtt_host') || '192.168.0.19'
-  );
+  const [mqttHost, setMqttHost] = useState(() => {
+    const saved = localStorage.getItem('mqtt_host');
+    if (saved) return saved;
+    // Auto-detect: try to use localhost or current host's IP
+    if (typeof window !== 'undefined') {
+      const hostname = window.location.hostname;
+      // If running on localhost, default to localhost
+      if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        return 'localhost';
+      }
+      // Otherwise use current hostname (same machine)
+      return hostname;
+    }
+    return '192.168.0.19';
+  });
   const [mqttPort, setMqttPort] = useState(() => 
     localStorage.getItem('mqtt_port') || '9001'
   );
