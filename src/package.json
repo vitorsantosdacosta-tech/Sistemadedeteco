@@ -5,10 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "tsc && vite build",
     "preview": "vite preview",
     "server": "node server-example.js",
-    "test-mqtt": "node test-mqtt.js"
+    "test-mqtt": "node test-mqtt.js",
+    "check": "node check-env.js"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.0.4",

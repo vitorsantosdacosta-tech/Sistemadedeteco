@@ -2,111 +2,110 @@
 
 ## Instalação em 3 passos
 
-### 1️⃣ Instalar dependências
+### 1️⃣ Verificar ambiente (opcional mas recomendado)
+```bash
+npm run check
+```
+
+Este comando verifica se tudo está instalado corretamente.
+
+### 2️⃣ Instalar dependências
 ```bash
 npm install
 ```
 
-**Nota**: Se houver erro com Tailwind v4, o sistema usará a versão alpha mais estável. Caso persista, rode:
+Se houver erro:
 ```bash
 npm install --legacy-peer-deps
 ```
 
-### 2️⃣ Rodar o sistema
+### 3️⃣ Rodar o sistema
 ```bash
 npm run dev
 ```
 
 O sistema abrirá automaticamente em `http://localhost:3000`
 
-### 3️⃣ Configurar conexão MQTT
+---
 
-Na interface web:
+## ⚙️ Configuração Rápida
+
 1. Clique em **Configurações** (ícone de engrenagem)
 2. Configure:
-   - **Broker IP**: `192.168.0.19` (ou o IP do seu broker)
-   - **Porta WebSocket**: `9001`
+   - **Broker IP**: `localhost` (auto-detectado)
+   - **Porta**: `9001`
    - **Tópico**: `esp32/motion`
+   - **Conexão Segura**: DESMARCADO
 3. Clique em **Conectar**
 
-✅ Pronto! O sistema já está monitorando.
+✅ **Pronto!** Sistema conectado e monitorando.
 
 ---
 
-## 🧪 Testar sem hardware ESP32
+## 🧪 Testar sem ESP32
 
-### Opção 1: Usar script de teste
+### Opção 1: Script Automático (RECOMENDADO)
 ```bash
-# Terminal 1: Rodar o frontend
-npm run dev
-
-# Terminal 2: Enviar mensagens de teste
 npm run test-mqtt
 ```
 
-### Opção 2: Publicar manualmente
+### Opção 2: Manual
 ```bash
-mosquitto_pub -h 192.168.0.19 -t esp32/motion -m '{"mac":"AA:BB:CC","state":"move"}'
+mosquitto_pub -h localhost -t esp32/motion -m '{"mac":"AA:BB:CC","state":"move"}'
 ```
 
 ---
 
-## 📋 Scripts disponíveis
+## 🔧 Configurar Mosquitto (Se necessário)
 
-| Comando | Descrição |
-|---------|-----------|
-| `npm run dev` | Inicia o servidor de desenvolvimento |
-| `npm run build` | Cria build de produção |
-| `npm run preview` | Preview da build de produção |
-| `npm run server` | Exemplo de servidor Node.js que ouve MQTT |
-| `npm run test-mqtt` | Envia 20 mensagens de teste ao broker |
-
----
-
-## ⚙️ Configuração do Mosquitto
-
-Se você ainda não tem o Mosquitto configurado com WebSocket:
-
-### Editar `/etc/mosquitto/mosquitto.conf`
+Edite `/etc/mosquitto/mosquitto.conf`:
 ```conf
-# Porta TCP (Node.js)
 listener 1883
 protocol mqtt
 
-# Porta WebSocket (Navegador)
 listener 9001
 protocol websockets
 
 allow_anonymous true
 ```
 
-### Reiniciar Mosquitto
+Reinicie:
 ```bash
 sudo systemctl restart mosquitto
 ```
 
 ---
 
-## 🎯 Criar uma regra de alerta
+## 📋 Comandos Disponíveis
 
-1. Vá na aba **Regras**
-2. Clique em **Nova Regra**
-3. Preencha:
-   ```
-   Nome: Movimento Noturno
-   MAC: AA:BB:CC (ou vazio para todos)
-   Estado: Movimento
-   Horário: 22:00 às 06:00
-   ```
-4. Salve
-
-Agora quando um ESP32 enviar movimento entre 22h e 6h, você receberá um alerta vermelho! 🚨
+| Comando | Descrição |
+|---------|-----------|
+| `npm run check` | Verifica ambiente e dependências |
+| `npm run dev` | Inicia servidor (porta 3000) |
+| `npm run build` | Build de produção |
+| `npm run test-mqtt` | Envia mensagens de teste |
+| `npm run server` | Servidor Node.js de exemplo |
 
 ---
 
-## 📱 Formato da mensagem ESP32
+## 🎯 Criar Regra de Alerta
 
-Seu ESP32 deve publicar neste formato:
+1. Aba **Regras** → **Nova Regra**
+2. Configure:
+   - Nome: `Movimento Noturno`
+   - MAC: (vazio = todos)
+   - Estado: `Movimento`
+   - Horário: `22:00` até `06:00`
+3. Salvar
+
+Teste:
+```bash
+mosquitto_pub -h localhost -t esp32/motion -m '{"mac":"TEST","state":"move"}'
+```
+
+---
+
+## 📱 Formato ESP32
 
 ```json
 {
@@ -115,29 +114,48 @@ Seu ESP32 deve publicar neste formato:
 }
 ```
 
-Estados válidos: `move`, `static`, `someone`
+**Estados**: `move`, `static`, `someone`
 
 ---
 
-## ❓ Problemas comuns
+## 🐛 Problemas Comuns
 
-### "Failed to construct WebSocket"
-- ✅ Solução: Marque "Usar conexão segura (WSS)" se estiver em HTTPS
+### CSS quebrado
+```bash
+rm -rf node_modules package-lock.json
+npm install
+```
 
-### Não conecta ao broker
-- ✅ Verifique se Mosquitto está rodando: `sudo systemctl status mosquitto`
-- ✅ Confirme que a porta 9001 está configurada para WebSocket
+### Mosquitto não conecta
+```bash
+sudo systemctl status mosquitto
+sudo systemctl restart mosquitto
+```
 
-### Não recebe mensagens
-- ✅ Teste com: `mosquitto_pub -h 192.168.0.19 -t esp32/motion -m '{"mac":"TEST","state":"move"}'`
-- ✅ Verifique o tópico configurado no sistema
+### WebSocket não funciona
+Certifique-se que tem no `mosquitto.conf`:
+```conf
+listener 9001
+protocol websockets
+```
 
 ---
 
-## 📚 Documentação completa
+## 📚 Documentação Completa
 
-Veja `README_INSTALACAO.md` para documentação detalhada.
+- `INSTALACAO_COMPLETA.md` - Guia detalhado
+- `README_INSTALACAO.md` - Documentação técnica
 
 ---
 
-**Dica**: Use `Ctrl+C` nos terminais para parar os processos.
+## ✅ Checklist Rápido
+
+- [ ] Node.js 18+ instalado
+- [ ] `npm install` executado
+- [ ] Mosquitto rodando
+- [ ] WebSocket porta 9001 configurado
+- [ ] `npm run dev` funcionando
+- [ ] Sistema conectado ao broker
+- [ ] `npm run test-mqtt` envia mensagens
+
+**Tudo OK?** Você está pronto! 🎉

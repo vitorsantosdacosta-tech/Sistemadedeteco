@@ -1,237 +1,247 @@
-# Sistema de Monitoramento MQTT ESP32
+# 🌐 Sistema MQTT ESP32 Monitor
 
-Sistema simplificado de monitoramento em tempo real de sensores de presença ESP32 via MQTT local.
+Sistema completo de monitoramento em tempo real para sensores ESP32 via MQTT, com interface web React e sistema de alertas personalizáveis.
 
-## 📋 Visão Geral
+![Status](https://img.shields.io/badge/status-production-green)
+![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)
+![License](https://img.shields.io/badge/license-MIT-blue)
 
-Este sistema permite monitorar sensores ESP32 que detectam presença e movimento através de um broker MQTT local. Todos os dados são armazenados temporariamente apenas durante a sessão atual, sem necessidade de banco de dados ou autenticação.
+---
 
-## ✨ Características Principais
+## 🚀 Instalação Rápida
 
-- ✅ **Conexão MQTT Local**: Conecta diretamente a um broker MQTT na mesma rede
-- ✅ **Monitoramento em Tempo Real**: Recebe e exibe eventos instantaneamente
-- ✅ **Armazenamento Temporário**: Dados mantidos apenas durante a sessão
-- ✅ **Interface Responsiva**: Funciona em desktop e mobile
-- ✅ **Exportação de Dados**: Exporta logs em JSON ou CSV
-- ✅ **Sem Autenticação**: Sistema simples e direto
+```bash
+# 1. Verificar ambiente
+npm run check
 
-## 🎯 Estados de Detecção
+# 2. Instalar dependências
+npm install
 
-O sistema reconhece três estados enviados pelos sensores ESP32:
-
-- **move**: Presença com movimento detectado
-- **static**: Local vazio, sem presença
-- **someone**: Alguém presente, mas parado
-
-## 📊 Formato das Mensagens MQTT
-
-Os sensores ESP32 devem enviar mensagens no seguinte formato JSON:
-
-```json
-{"mac":"AA:BB:CC:DD:EE:FF","state":"move"}
+# 3. Rodar o sistema
+npm run dev
 ```
 
-Onde:
-- `mac`: Endereço MAC do sensor ESP32
-- `state`: Um dos estados: `move`, `static` ou `someone`
+**Pronto!** Acesse: `http://localhost:3000`
 
-## 🔧 Configuração
+---
 
-### Requisitos
+## ✨ Funcionalidades
 
-1. **Broker MQTT** configurado na rede local com suporte WebSocket
-2. **Sensores ESP32** programados para enviar mensagens no formato esperado
+- ✅ **Monitoramento em Tempo Real** via MQTT WebSocket
+- ✅ **Dashboard Interativo** com estatísticas e gráficos
+- ✅ **Sistema de Alertas** com regras personalizáveis por horário
+- ✅ **Logs Completos** de todos os eventos
+- ✅ **Multi-dispositivos** suporta múltiplos ESP32
+- ✅ **Responsivo** funciona em desktop e mobile
+- ✅ **Auto-detecção** de broker localhost
+- ✅ **Sem Backend** tudo funciona no frontend
 
-### Configuração do Broker MQTT
+---
 
-O sistema usa as seguintes configurações padrão (todas editáveis na interface):
+## 📋 Pré-requisitos
 
-- **Host**: `192.168.0.19`
-- **Porta WebSocket**: `9001`
-- **Tópico**: `esp32/motion`
+- Node.js 18+
+- Mosquitto MQTT Broker com WebSocket (porta 9001)
+- ESP32 com sensor de movimento (opcional para testes)
 
-### Configuração do Mosquitto
+---
 
-Para usar o Mosquitto como broker MQTT, adicione ao arquivo `mosquitto.conf`:
+## 📖 Documentação
+
+- **[QUICK_START.md](QUICK_START.md)** - Início rápido em 3 minutos
+- **[INSTALACAO_COMPLETA.md](INSTALACAO_COMPLETA.md)** - Guia detalhado passo a passo
+- **[README_INSTALACAO.md](README_INSTALACAO.md)** - Documentação técnica completa
+
+---
+
+## 🎮 Testando o Sistema
+
+### Com script automático:
+```bash
+npm run test-mqtt
+```
+
+### Manual com mosquitto_pub:
+```bash
+mosquitto_pub -h localhost -t esp32/motion -m '{"mac":"AA:BB:CC","state":"move"}'
+```
+
+---
+
+## 📱 Formato de Mensagem
+
+```json
+{
+  "mac": "AA:BB:CC:DD:EE:FF",
+  "state": "move"
+}
+```
+
+### Estados suportados:
+- `move` - Movimento detectado
+- `static` - Lugar vazio  
+- `someone` - Presença parada
+
+---
+
+## 🏗️ Arquitetura
+
+```
+Frontend (React + Vite)
+    ↓ WebSocket (ws://localhost:9001)
+Mosquitto Broker
+    ↑ MQTT TCP (mqtt://localhost:1883)
+ESP32 Sensores
+```
+
+---
+
+## 🔧 Configuração do Mosquitto
+
+Adicione ao `/etc/mosquitto/mosquitto.conf`:
 
 ```conf
-# Porta padrão MQTT
 listener 1883
+protocol mqtt
 
-# WebSocket para conexão do navegador
 listener 9001
 protocol websockets
 
-# Permitir conexões anônimas (ajuste conforme sua necessidade de segurança)
 allow_anonymous true
 ```
 
-Reinicie o Mosquitto:
+Reinicie:
 ```bash
 sudo systemctl restart mosquitto
 ```
 
-## 🚀 Como Usar
+---
 
-### 1. Iniciar o Sistema
+## 📊 Stack Tecnológico
 
-Abra a aplicação no navegador. A interface será carregada automaticamente.
-
-### 2. Conectar ao Broker MQTT
-
-1. Clique no botão **Configurações** no canto superior direito
-2. Configure o IP do broker, porta e tópico (se diferente do padrão)
-3. Clique em **Conectar**
-4. Aguarde a confirmação da conexão
-
-### 3. Monitorar Eventos
-
-- Os eventos aparecem em tempo real na página inicial
-- Acesse **Logs** para ver o histórico completo da sessão
-- Use os filtros para buscar eventos específicos
-
-### 4. Exportar Dados
-
-Na página de Logs:
-- Clique em **JSON** para exportar em formato JSON
-- Clique em **CSV** para exportar em formato CSV
-- Clique em **Limpar** para remover todos os logs
-
-## 📱 Interface
-
-### Página Inicial
-- Resumo de estatísticas da sessão
-- Últimos 5 eventos recebidos
-- Lista de dispositivos detectados
-- Indicador de conexão MQTT
-
-### Página de Logs
-- Histórico completo de eventos
-- Busca por MAC ou mensagem
-- Filtros por estado (move/static/someone)
-- Exportação de dados
-- Estatísticas detalhadas
-
-## 🧪 Testar o Sistema
-
-### Com Mosquitto Publish
-
-Você pode testar o sistema enviando mensagens manualmente:
-
-```bash
-# Enviar evento de movimento
-mosquitto_pub -h 192.168.0.19 -t esp32/motion -m '{"mac":"AA:BB:CC:DD:EE:FF","state":"move"}'
-
-# Enviar evento de local vazio
-mosquitto_pub -h 192.168.0.19 -t esp32/motion -m '{"mac":"AA:BB:CC:DD:EE:FF","state":"static"}'
-
-# Enviar evento de presença parada
-mosquitto_pub -h 192.168.0.19 -t esp32/motion -m '{"mac":"AA:BB:CC:DD:EE:FF","state":"someone"}'
-```
-
-### Monitorar Mensagens
-
-Para verificar se as mensagens estão sendo enviadas:
-
-```bash
-mosquitto_sub -h 192.168.0.19 -t esp32/motion
-```
-
-## 🔒 Segurança
-
-⚠️ **Importante**: Este sistema é destinado para uso em redes locais confiáveis.
-
-- Não há autenticação de usuários
-- Dados são temporários e não persistentes
-- Configure o firewall para bloquear acesso externo ao broker MQTT
-- Use VPN se precisar acessar remotamente
-
-## 🛠️ Tecnologias
-
-- **React** - Interface do usuário
-- **Tailwind CSS** - Estilização
-- **mqtt.js** - Cliente MQTT para navegador
-- **Lucide React** - Ícones
-- **Sonner** - Notificações toast
-
-## 📝 Estrutura do Projeto
-
-```
-/
-├── App.tsx                 # Componente principal
-├── components/
-│   ├── Layout.tsx         # Layout com header e conexão MQTT
-│   ├── HomePage.tsx       # Página inicial com resumo
-│   └── AlertsPage.tsx     # Página de logs completos
-└── styles/
-    └── globals.css        # Estilos globais
-```
-
-## ⚙️ Programação do ESP32
-
-Exemplo básico de código para ESP32 (Arduino):
-
-```cpp
-#include <WiFi.h>
-#include <PubSubClient.h>
-
-const char* ssid = "SUA_REDE";
-const char* password = "SUA_SENHA";
-const char* mqtt_server = "192.168.0.19";
-const char* mqtt_topic = "esp32/motion";
-
-WiFiClient espClient;
-PubSubClient client(espClient);
-
-void setup() {
-  Serial.begin(115200);
-  
-  // Conectar WiFi
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  
-  // Configurar MQTT
-  client.setServer(mqtt_server, 1883);
-  
-  // Conectar MQTT
-  while (!client.connected()) {
-    if (client.connect("ESP32Client")) {
-      Serial.println("MQTT conectado");
-    }
-  }
-}
-
-void loop() {
-  if (!client.connected()) {
-    // Reconectar se necessário
-  }
-  
-  client.loop();
-  
-  // Detectar movimento (exemplo simplificado)
-  bool movement = detectMovement(); // Sua lógica aqui
-  
-  String mac = WiFi.macAddress();
-  String state = movement ? "move" : "static";
-  String payload = "{\"mac\":\"" + mac + "\",\"state\":\"" + state + "\"}";
-  
-  client.publish(mqtt_topic, payload.c_str());
-  
-  delay(1000); // Aguardar 1 segundo
-}
-```
-
-## 📄 Licença
-
-Este projeto é fornecido como está, sem garantias de qualquer tipo.
-
-## 🤝 Contribuições
-
-Sugestões e melhorias são bem-vindas!
+| Categoria | Tecnologia |
+|-----------|------------|
+| Frontend | React 18 + TypeScript |
+| Build | Vite 5 |
+| Styling | Tailwind CSS 3 |
+| MQTT | MQTT.js |
+| UI Components | Radix UI |
+| Charts | Recharts |
+| Icons | Lucide React |
+| Notifications | Sonner |
 
 ---
 
-**Nota**: Este sistema armazena dados apenas durante a sessão. Ao recarregar a página, todos os logs são perdidos.
+## 🎯 Criando Regras de Alerta
+
+1. Acesse a aba **Regras**
+2. Clique em **Nova Regra**
+3. Configure:
+   - Nome da regra
+   - MAC do dispositivo (ou vazio para todos)
+   - Estado do sensor
+   - Horário de monitoramento
+4. Ative a regra
+
+Quando as condições forem atendidas, você receberá alertas visuais na tela! 🚨
+
+---
+
+## 📝 Comandos Disponíveis
+
+```bash
+npm run dev          # Desenvolvimento (porta 3000)
+npm run build        # Build de produção
+npm run preview      # Preview da build
+npm run check        # Verificar ambiente
+npm run test-mqtt    # Enviar mensagens de teste
+npm run server       # Servidor Node.js exemplo
+```
+
+---
+
+## 🌐 Usando em Rede Local
+
+Para acessar de outros dispositivos:
+
+1. Descubra seu IP: `ip addr` ou `ifconfig`
+2. Configure Vite para aceitar conexões externas:
+   ```typescript
+   // vite.config.ts
+   server: {
+     host: '0.0.0.0',
+     port: 3000
+   }
+   ```
+3. Acesse de outro dispositivo: `http://192.168.x.x:3000`
+
+---
+
+## 🐛 Troubleshooting
+
+### CSS quebrado?
+```bash
+rm -rf node_modules package-lock.json
+npm install
+```
+
+### MQTT não conecta?
+```bash
+sudo systemctl status mosquitto
+sudo systemctl restart mosquitto
+```
+
+### WebSocket não funciona?
+Verifique se tem no `mosquitto.conf`:
+```conf
+listener 9001
+protocol websockets
+```
+
+---
+
+## 🤝 Contribuindo
+
+Contribuições são bem-vindas! Sinta-se livre para:
+
+1. Fazer fork do projeto
+2. Criar uma branch (`git checkout -b feature/nova-funcionalidade`)
+3. Commit suas mudanças (`git commit -am 'Adiciona nova funcionalidade'`)
+4. Push para a branch (`git push origin feature/nova-funcionalidade`)
+5. Abrir um Pull Request
+
+---
+
+## 📄 Licença
+
+Este projeto é open source e está disponível sob a licença MIT.
+
+---
+
+## 👨‍💻 Autor
+
+Sistema desenvolvido para monitoramento de sensores ESP32 via MQTT.
+
+---
+
+## 🙏 Agradecimentos
+
+- Eclipse Mosquitto
+- React Team
+- Vite Team
+- Tailwind CSS
+- Radix UI
+
+---
+
+## 📞 Suporte
+
+Problemas? Consulte:
+1. [INSTALACAO_COMPLETA.md](INSTALACAO_COMPLETA.md) - Guia detalhado
+2. Logs do navegador (F12 → Console)
+3. Logs do Mosquitto: `sudo journalctl -u mosquitto -f`
+
+---
+
+**⭐ Se este projeto foi útil, considere dar uma estrela!**
+
